@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.9-slim' // Use an image with Python3 pre-installed
-            args '-v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket if Docker commands are needed
+            image 'python:3.9-slim' // Docker image with Python 3.9
+            args '-v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket to run Docker commands
         }
     }
     environment {
@@ -20,8 +20,11 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
+                   # Create and activate Python virtual environment
                    python3 -m venv venv
                    . venv/bin/activate
+
+                   # Install Python dependencies
                    NEXUS_PYPI_URL="${NEXUS_URL}/repository/${GROUP_REPO_NAME}/simple"
                    pip install --trusted-host ${NEXUS_URL} --index-url ${NEXUS_PYPI_URL} -r requirements.txt
                 '''
@@ -47,8 +50,8 @@ pipeline {
         }
     }
     post {
-        cleanup {
-            cleanWs()
+        always {
+            cleanWs() // Cleanup workspace
         }
     }
 }
