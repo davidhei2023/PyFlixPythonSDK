@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.9'  // Use the official Python 3.9 Docker image
-            args '-u root:root'  // Run as root user
-        }
-    }
+    agent any
     environment {
         NEXUS_CREDENTIALS_ID = "nexus"
         NEXUS_URL = "http://localhost:8082"
@@ -15,11 +10,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                   # Set up the virtual environment
                    python3 -m venv venv
                    . venv/bin/activate
 
-                   # Install dependencies from Nexus repository
                    NEXUS_PYPI_URL="${NEXUS_URL}/repository/${GROUP_REPO_NAME}/simple"
                    pip install --trusted-host ${NEXUS_URL} --index-url ${NEXUS_PYPI_URL} -r requirements.txt
                 '''
