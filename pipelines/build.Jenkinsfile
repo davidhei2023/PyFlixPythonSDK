@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.9-slim' // Replace with an image that has both Python3 and Docker if needed
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
     environment {
         NEXUS_CREDENTIALS_ID = "nexus"
         NEXUS_URL = "http://localhost:8082"
@@ -7,33 +12,9 @@ pipeline {
         DEV_HOSTED_REPO_NAME = "py-dev"
     }
     stages {
-        stage('Install Python3') {
+        stage('Checkout') {
             steps {
-                sh '''
-                   if ! command -v python3 &> /dev/null
-                   then
-                       echo "Python3 could not be found, installing..."
-                       apt-get update
-                       apt-get install -y python3 python3-venv python3-pip
-                   else
-                       echo "Python3 is already installed"
-                   fi
-                '''
-            }
-        }
-        stage('Install Docker') {
-            steps {
-                sh '''
-                   if ! command -v docker &> /dev/null
-                   then
-                       echo "Docker could not be found, installing..."
-                       curl -fsSL https://get.docker.com -o get-docker.sh
-                       sh get-docker.sh
-                       rm get-docker.sh
-                   else
-                       echo "Docker is already installed"
-                   fi
-                '''
+                git branch: 'dev', url: 'https://github.com/davidhei2023/PyFlixPythonSDK.git'
             }
         }
         stage('Install Dependencies') {
