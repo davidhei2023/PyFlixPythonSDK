@@ -4,7 +4,7 @@ import requests
 class Client:
     def __init__(self, api_key):
         self.api_key = api_key
-        self.base_url = 'https://api.netflix.com'
+        self.base_url = 'https://api.netflix.com/v1.0.2'
 
     def search_movies(self, query):
         endpoint = f'{self.base_url}/movies/search'
