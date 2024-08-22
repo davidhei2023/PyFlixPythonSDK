@@ -7,6 +7,35 @@ pipeline {
         DEV_HOSTED_REPO_NAME = "py-dev"
     }
     stages {
+        stage('Install Python3') {
+            steps {
+                sh '''
+                   if ! command -v python3 &> /dev/null
+                   then
+                       echo "Python3 could not be found, installing..."
+                       sudo apt-get update
+                       sudo apt-get install -y python3 python3-venv python3-pip
+                   else
+                       echo "Python3 is already installed"
+                   fi
+                '''
+            }
+        }
+        stage('Install Docker') {
+            steps {
+                sh '''
+                   if ! command -v docker &> /dev/null
+                   then
+                       echo "Docker could not be found, installing..."
+                       curl -fsSL https://get.docker.com -o get-docker.sh
+                       sh get-docker.sh
+                       rm get-docker.sh
+                   else
+                       echo "Docker is already installed"
+                   fi
+                '''
+            }
+        }
         stage('Install Dependencies') {
             steps {
                 sh '''
@@ -22,18 +51,17 @@ pipeline {
             steps {
                 sh '''
                   . venv/bin/activate
-                  python -m unittest discover -s tests
+                  python3 -m unittest discover -s tests
                 '''
             }
         }
         stage('Upload to pypi dev') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
-                    sh """
+                    sh '''
                         . venv/bin/activate
-                        python setup.py sdist bdist_wheel
                         twine upload --repository-url ${NEXUS_URL}/repository/${DEV_HOSTED_REPO_NAME}/ -u $NEXUS_USERNAME -p $NEXUS_PASSWORD dist/*
-                    """
+                    '''
                 }
             }
         }
