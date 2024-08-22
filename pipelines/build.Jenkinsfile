@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.9-slim' // Replace with an image that has both Python3 and Docker if needed
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
+            image 'python:3.9-slim' // Use an image with Python3 pre-installed
+            args '-v /var/run/docker.sock:/var/run/docker.sock' // Mount Docker socket if Docker commands are needed
         }
     }
     environment {
@@ -22,7 +22,6 @@ pipeline {
                 sh '''
                    python3 -m venv venv
                    . venv/bin/activate
-
                    NEXUS_PYPI_URL="${NEXUS_URL}/repository/${GROUP_REPO_NAME}/simple"
                    pip install --trusted-host ${NEXUS_URL} --index-url ${NEXUS_PYPI_URL} -r requirements.txt
                 '''
