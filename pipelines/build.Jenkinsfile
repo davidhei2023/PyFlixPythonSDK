@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.9'  // Use the official Python 3.9 Docker image
+            args '-u root:root'  // Run as root user
+        }
+    }
     environment {
         NEXUS_CREDENTIALS_ID = "nexus"
         NEXUS_URL = "http://localhost:8082"
@@ -7,19 +12,6 @@ pipeline {
         DEV_HOSTED_REPO_NAME = "py-dev"
     }
     stages {
-        stage('Install Python') {
-            steps {
-                sh '''
-                   # Ensure Python 3 is installed
-                   if ! command -v python3 &> /dev/null
-                   then
-                       echo "Python3 could not be found, installing..."
-                       sudo apt-get update
-                       sudo apt-get install -y python3 python3-venv python3-pip
-                   fi
-                '''
-            }
-        }
         stage('Install Dependencies') {
             steps {
                 sh '''
